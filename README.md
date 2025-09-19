@@ -1,3 +1,5 @@
+PROJETO GERADO COM PROMPTS. 
+
 # Anti-Prompt Injection System V2
 
 Sistema simplificado de detecção de prompt injection baseado em comparação de 10 palavras-chave específicas.
@@ -147,3 +149,8 @@ tests/
 ## Versão
 
 2.0.0 - Sistema simplificado por comparação de caracteres
+
+
+Diagrama Obtido:
+
+<img width="1012" height="661" alt="image" src="https://github.com/user-attachments/assets/686e5c1f-6078-46d9-bc28-bf95a87d27b5" />
