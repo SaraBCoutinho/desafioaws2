@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-09-19T20:56:31.505Z" agent="5.0" etag="draw.io" version="24.7.17">
+  <diagram name="Anti-Prompt Injection V2" id="anti-prompt-injection-v2">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="title" value="Sistema Anti-Prompt Injection V2 - Arquitetura" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-web" value="Usuário Web&#xa;(Interface HTML)" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="80" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user-api" value="Cliente API&#xa;(REST Client)" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="220" width="80" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="load-balancer" value="Load Balancer&#xa;(Nginx/ALB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="250" y="150" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="fastapi-container" value="Aplicação FastAPI" style="swimlane;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="450" y="80" width="200" height="160" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="fastapi-1" value="API Instance 1&#xa;(Port 8080)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="fastapi-container">
+          <mxGeometry x="20" y="40" width="80" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="fastapi-2" value="API Instance 2&#xa;(Port 8081)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="fastapi-container">
+          <mxGeometry x="110" y="40" width="80" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="endpoints" value="Endpoints:&#xa;• GET /health&#xa;• POST /api/v1/check-prompt&#xa;• GET / (demo page)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="fastapi-container">
+          <mxGeometry x="10" y="100" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="core-container" value="Componentes Core" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="450" y="280" width="300" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="detector" value="Detector Engine&#xa;(detector.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="core-container">
+          <mxGeometry x="20" y="40" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="keywords" value="Keywords List&#xa;(10 palavras)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="core-container">
+          <mxGeometry x="150" y="40" width="80" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="validator" value="Input Validator&#xa;(Pydantic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="core-container">
+          <mxGeometry x="20" y="120" width="100" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="algorithm" value="Algoritmo:&#xa;• Normalização lowercase&#xa;• Busca sequencial O(n*m)&#xa;• Primeira palavra encontrada&#xa;• Tempo &lt; 10ms" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="core-container">
+          <mxGeometry x="150" y="120" width="140" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="obs-container" value="Observabilidade" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="800" y="150" width="150" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="logs" value="Logs&#xa;(JSON Format)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="obs-container">
+          <mxGeometry x="20" y="30" width="60" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="metrics" value="Métricas&#xa;(Performance)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="obs-container">
+          <mxGeometry x="90" y="30" width="60" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn1" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="user-web" target="load-balancer">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn2" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="user-api" target="load-balancer">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn3" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="load-balancer" target="fastapi-container">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn4" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="fastapi-container" target="core-container">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn5" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="fastapi-container" target="obs-container">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="label1" value="HTTP Request" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="170" y="120" width="70" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="label2" value="API Call" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="170" y="240" width="70" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="label3" value="Load Balance" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="160" width="70" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="label4" value="Process Request" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="250" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="label5" value="Monitoring" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="160" width="70" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend" value="Palavras-chave Monitoradas:&#xa;ignore, forget, system, admin, override,&#xa;bypass, jailbreak, prompt, instruction, command" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="520" width="300" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="performance" value="Performance:&#xa;• Latência &lt; 10ms&#xa;• Throughput &gt; 1000 req/s&#xa;• Memory &lt; 100MB&#xa;• Cobertura de testes: 92%" style="text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="520" width="200" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="tech-stack" value="Stack Tecnológico:&#xa;• Python 3.9+ / FastAPI&#xa;• Pydantic (validação)&#xa;• Pytest (testes)&#xa;• Docker (container)&#xa;• Uvicorn (servidor)" style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="520" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

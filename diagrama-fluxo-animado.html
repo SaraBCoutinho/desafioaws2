@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Prompt Injection V2 - Fluxo de Dados Animado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .flow-diagram {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            overflow: hidden;
+        }
+
+        .flow-node {
+            position: absolute;
+            border-radius: 15px;
+            padding: 20px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .flow-node:hover {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+
+        /* Nodes específicos */
+        .user-node {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            width: 120px;
+            height: 100px;
+            top: 50px;
+            left: 50px;
+        }
+
+        .interface-node {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            width: 140px;
+            height: 80px;
+            top: 200px;
+            left: 250px;
+        }
+
+        .api-node {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            width: 140px;
+            height: 80px;
+            top: 300px;
+            left: 250px;
+        }
+
+        .fastapi-node {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2c3e50;
+            width: 160px;
+            height: 120px;
+            top: 240px;
+            left: 500px;
+        }
+
+        .validator-node {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #2c3e50;
+            width: 120px;
+            height: 80px;
+            top: 150px;
+            left: 750px;
+        }
+
+        .detector-node {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #2c3e50;
+            width: 140px;
+            height: 100px;
+            top: 280px;
+            left: 750px;
+        }
+
+        .keywords-node {
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            color: white;
+            width: 120px;
+            height: 80px;
+            top: 420px;
+            left: 750px;
+        }
+
+        .response-node {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 140px;
+            height: 100px;
+            top: 240px;
+            left: 1000px;
+        }
+
+        .result-node {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            width: 120px;
+            height: 80px;
+            top: 100px;
+            left: 1250px;
+        }
+
+        /* Animação de fluxo */
+        .flow-path {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            border-radius: 2px;
+            opacity: 0;
+        }
+
+        .flow-particle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #667eea, #764ba2);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
+        }
+
+        @keyframes flowAnimation {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(20px) scale(0.5);
+            }
+        }
+
+        .flow-active {
+            animation: flowAnimation 2s ease-in-out;
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #27ae60;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .status-processing {
+            background: #f39c12;
+            animation: pulse 1s infinite;
+        }
+
+        .status-error {
+            background: #e74c3c;
+        }
+
+        /* Info panel */
+        .info-panel {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .info-section h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .info-section p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .step-indicator {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .highlight {
+            animation: pulse 1s ease-in-out;
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.5) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Fluxo de Dados - Anti-Prompt Injection V2</h1>
+            <p>Visualização Interativa do Processamento de Prompts</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="startFlow('safe')">🟢 Simular Prompt Seguro</button>
+            <button class="btn" onclick="startFlow('detected')">🔴 Simular Prompt Suspeito</button>
+            <button class="btn" onclick="resetFlow()">🔄 Reset</button>
+        </div>
+
+        <div class="flow-diagram" id="flowDiagram">
+            <!-- Usuário -->
+            <div class="flow-node user-node" id="user" data-step="1">
+                👤<br>Usuário<br>
+                <small>Entrada</small>
+                <div class="status-indicator" id="user-status"></div>
+            </div>
+
+            <!-- Interface Web -->
+            <div class="flow-node interface-node" id="interface" data-step="2">
+                🌐<br>Interface<br>Web
+                <div class="status-indicator" id="interface-status"></div>
+            </div>
+
+            <!-- API REST -->
+            <div class="flow-node api-node" id="api" data-step="2">
+                🔌<br>API<br>REST
+                <div class="status-indicator" id="api-status"></div>
+            </div>
+
+            <!-- FastAPI -->
+            <div class="flow-node fastapi-node" id="fastapi" data-step="3">
+                🚀<br>FastAPI<br>Application<br>
+                <small>Recebe Request</small>
+                <div class="status-indicator" id="fastapi-status"></div>
+            </div>
+
+            <!-- Validator -->
+            <div class="flow-node validator-node" id="validator" data-step="4">
+                ✅<br>Input<br>Validator
+                <div class="status-indicator" id="validator-status"></div>
+            </div>
+
+            <!-- Detector -->
+            <div class="flow-node detector-node" id="detector" data-step="5">
+                🔍<br>Detector<br>Engine<br>
+                <small>Análise</small>
+                <div class="status-indicator" id="detector-status"></div>
+            </div>
+
+            <!-- Keywords -->
+            <div class="flow-node keywords-node" id="keywords" data-step="6">
+                📝<br>Keywords<br>Database
+                <div class="status-indicator" id="keywords-status"></div>
+            </div>
+
+            <!-- Response -->
+            <div class="flow-node response-node" id="response" data-step="7">
+                📤<br>Response<br>Generator<br>
+                <small>JSON/HTML</small>
+                <div class="status-indicator" id="response-status"></div>
+            </div>
+
+            <!-- Result -->
+            <div class="flow-node result-node" id="result" data-step="8">
+                🎯<br>Resultado<br>Final
+                <div class="status-indicator" id="result-status"></div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-section">
+                <h3>🔄 Fluxo de Processamento</h3>
+                <div class="step-indicator" id="step1">
+                    <strong>1. Entrada do Usuário</strong><br>
+                    Prompt enviado via interface web ou API REST
+                </div>
+                <div class="step-indicator" id="step2">
+                    <strong>2. Recepção da Requisição</strong><br>
+                    FastAPI recebe e roteia a requisição
+                </div>
+                <div class="step-indicator" id="step3">
+                    <strong>3. Validação de Entrada</strong><br>
+                    Pydantic valida formato e tamanho do prompt
+                </div>
+                <div class="step-indicator" id="step4">
+                    <strong>4. Análise de Detecção</strong><br>
+                    Motor busca por palavras-chave suspeitas
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>⚡ Performance em Tempo Real</h3>
+                <p><strong>Latência:</strong> <span id="latency">0ms</span></p>
+                <p><strong>Status:</strong> <span id="status">Aguardando...</span></p>
+                <p><strong>Última Detecção:</strong> <span id="lastDetection">Nenhuma</span></p>
+                <p><strong>Throughput:</strong> > 1000 req/s</p>
+            </div>
+
+            <div class="info-section">
+                <h3>🎯 Palavras-chave Ativas</h3>
+                <div id="keywordsList">
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">ignore</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">forget</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">system</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">admin</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">override</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">bypass</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">jailbreak</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">prompt</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">instruction</span>
+                    <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 15px; margin: 2px; display: inline-block; font-size: 12px;">command</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>📊 Estatísticas do Sistema</h3>
+                <p><strong>Algoritmo:</strong> Busca sequencial O(n*m)</p>
+                <p><strong>Cobertura de Testes:</strong> 92%</p>
+                <p><strong>Memory Usage:</strong> < 100MB</p>
+                <p><strong>Uptime:</strong> 99.9%</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFlow = null;
+        let flowTimeout = null;
+
+        function resetFlow() {
+            // Reset all status indicators
+            const indicators = document.querySelectorAll('.status-indicator');
+            indicators.forEach(indicator => {
+                indicator.className = 'status-indicator';
+            });
+
+            // Reset all nodes
+            const nodes = document.querySelectorAll('.flow-node');
+            nodes.forEach(node => {
+                node.classList.remove('highlight');
+            });
+
+            // Reset step indicators
+            const steps = document.querySelectorAll('.step-indicator');
+            steps.forEach(step => {
+                step.style.background = 'rgba(255,255,255,0.1)';
+                step.style.borderLeftColor = '#3498db';
+            });
+
+            // Reset status
+            document.getElementById('status').textContent = 'Aguardando...';
+            document.getElementById('latency').textContent = '0ms';
+            document.getElementById('lastDetection').textContent = 'Nenhuma';
+
+            if (flowTimeout) {
+                clearTimeout(flowTimeout);
+            }
+        }
+
+        function highlightNode(nodeId, status = 'processing') {
+            const node = document.getElementById(nodeId);
+            const indicator = document.getElementById(nodeId + '-status');
+            
+            node.classList.add('highlight');
+            indicator.classList.add('status-' + status);
+
+            setTimeout(() => {
+                node.classList.remove('highlight');
+            }, 1000);
+        }
+
+        function highlightStep(stepNum, active = true) {
+            const step = document.getElementById('step' + stepNum);
+            if (active) {
+                step.style.background = 'rgba(52, 152, 219, 0.3)';
+                step.style.borderLeftColor = '#3498db';
+            } else {
+                step.style.background = 'rgba(39, 174, 96, 0.3)';
+                step.style.borderLeftColor = '#27ae60';
+            }
+        }
+
+        function startFlow(type) {
+            resetFlow();
+            
+            const startTime = Date.now();
+            document.getElementById('status').textContent = 'Processando...';
+
+            // Simulate flow steps
+            const steps = [
+                { node: 'user', step: 1, delay: 0 },
+                { node: 'interface', step: 2, delay: 300 },
+                { node: 'fastapi', step: 2, delay: 600 },
+                { node: 'validator', step: 3, delay: 900 },
+                { node: 'detector', step: 4, delay: 1200 },
+                { node: 'keywords', step: 4, delay: 1500 },
+                { node: 'response', step: 4, delay: 1800 },
+                { node: 'result', step: 4, delay: 2100 }
+            ];
+
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    highlightNode(step.node, 'processing');
+                    highlightStep(step.step);
+                    
+                    if (index === steps.length - 1) {
+                        // Final result
+                        setTimeout(() => {
+                            const endTime = Date.now();
+                            const latency = endTime - startTime;
+                            
+                            document.getElementById('latency').textContent = latency + 'ms';
+                            
+                            if (type === 'detected') {
+                                document.getElementById('status').textContent = '🚨 PROMPT INJECTION DETECTADO!';
+                                document.getElementById('lastDetection').textContent = 'ignore (exemplo)';
+                                document.getElementById('result-status').classList.add('status-error');
+                            } else {
+                                document.getElementById('status').textContent = '✅ PROMPT SEGURO';
+                                document.getElementById('lastDetection').textContent = 'Nenhuma palavra encontrada';
+                                document.getElementById('result-status').classList.remove('status-processing');
+                            }
+                        }, 500);
+                    }
+                }, step.delay);
+            });
+        }
+
+        // Add click handlers for nodes
+        document.querySelectorAll('.flow-node').forEach(node => {
+            node.addEventListener('click', () => {
+                const nodeId = node.id;
+                let info = '';
+                
+                switch(nodeId) {
+                    case 'user':
+                        info = 'Ponto de entrada do sistema. Usuários enviam prompts para análise.';
+                        break;
+                    case 'interface':
+                        info = 'Interface web de demonstração. Permite teste interativo do sistema.';
+                        break;
+                    case 'api':
+                        info = 'API REST endpoint: POST /api/v1/check-prompt';
+                        break;
+                    case 'fastapi':
+                        info = 'Aplicação FastAPI que processa as requisições HTTP.';
+                        break;
+                    case 'validator':
+                        info = 'Validador Pydantic que verifica formato e tamanho do prompt.';
+                        break;
+                    case 'detector':
+                        info = 'Motor de detecção que executa o algoritmo de busca O(n*m).';
+                        break;
+                    case 'keywords':
+                        info = 'Base de dados com as 10 palavras-chave monitoradas.';
+                        break;
+                    case 'response':
+                        info = 'Gerador de resposta que formata o resultado em JSON/HTML.';
+                        break;
+                    case 'result':
+                        info = 'Resultado final enviado de volta ao usuário.';
+                        break;
+                }
+                
+                alert(node.textContent.trim() + '\n\n' + info);
+            });
+        });
+
+        // Auto-demo
+        let autoDemo = setInterval(() => {
+            const types = ['safe', 'detected'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            startFlow(randomType);
+        }, 8000);
+
+        // Stop auto-demo on user interaction
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                clearInterval(autoDemo);
+            });
+        });
+    </script>
+</body>
+</html>

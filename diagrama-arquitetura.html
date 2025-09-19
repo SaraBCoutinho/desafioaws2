@@ -1,0 +1,523 @@
+por <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Anti-Prompt Injection V2 - Diagrama de Arquitetura</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .diagram-container {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .architecture-diagram {
+            width: 100%;
+            height: 800px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .layer {
+            position: absolute;
+            border-radius: 8px;
+            padding: 15px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .layer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: #3498db;
+        }
+
+        /* Usuários */
+        .user-layer {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 120px;
+            height: 80px;
+            top: 50px;
+            left: 50px;
+        }
+
+        .user-api {
+            top: 150px;
+        }
+
+        /* Load Balancer */
+        .load-balancer {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            width: 150px;
+            height: 80px;
+            top: 100px;
+            left: 250px;
+        }
+
+        /* FastAPI Cluster */
+        .fastapi-cluster {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            width: 250px;
+            height: 180px;
+            top: 50px;
+            left: 500px;
+        }
+
+        .fastapi-instance {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            width: 100px;
+            height: 50px;
+            position: absolute;
+            font-size: 12px;
+        }
+
+        .instance1 {
+            top: 40px;
+            left: 20px;
+        }
+
+        .instance2 {
+            top: 40px;
+            left: 130px;
+        }
+
+        /* Core Components */
+        .core-cluster {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            width: 350px;
+            height: 200px;
+            top: 300px;
+            left: 450px;
+        }
+
+        .core-component {
+            background: linear-gradient(135deg, #ff9f43, #ee5a24);
+            color: white;
+            width: 100px;
+            height: 60px;
+            position: absolute;
+            font-size: 11px;
+        }
+
+        .detector {
+            top: 40px;
+            left: 20px;
+        }
+
+        .keywords {
+            top: 40px;
+            left: 140px;
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+
+        .validator {
+            top: 120px;
+            left: 20px;
+        }
+
+        /* Observabilidade */
+        .observability-cluster {
+            background: linear-gradient(135deg, #00d2d3, #54a0ff);
+            color: white;
+            width: 180px;
+            height: 120px;
+            top: 100px;
+            left: 850px;
+        }
+
+        .obs-component {
+            background: linear-gradient(135deg, #5f27cd, #341f97);
+            color: white;
+            width: 70px;
+            height: 40px;
+            position: absolute;
+            font-size: 10px;
+        }
+
+        .logs {
+            top: 40px;
+            left: 20px;
+        }
+
+        .metrics {
+            top: 40px;
+            left: 90px;
+        }
+
+        /* Conexões */
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            border-radius: 2px;
+        }
+
+        .conn1 {
+            width: 80px;
+            top: 90px;
+            left: 170px;
+        }
+
+        .conn2 {
+            width: 80px;
+            top: 190px;
+            left: 170px;
+        }
+
+        .conn3 {
+            width: 100px;
+            top: 140px;
+            left: 400px;
+        }
+
+        .conn4 {
+            width: 3px;
+            height: 70px;
+            top: 230px;
+            left: 575px;
+        }
+
+        .conn5 {
+            width: 100px;
+            top: 160px;
+            left: 750px;
+        }
+
+        /* Labels */
+        .label {
+            position: absolute;
+            font-size: 12px;
+            color: #2c3e50;
+            font-weight: bold;
+            background: rgba(255,255,255,0.9);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Info Panels */
+        .info-panel {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .info-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-card ul {
+            list-style: none;
+        }
+
+        .info-card li {
+            padding: 5px 0;
+            color: #555;
+        }
+
+        .info-card li:before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .keywords-list {
+            background: linear-gradient(135deg, #ff9ff3, #feca57);
+            color: #2c3e50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+            max-width: 200px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Sistema Anti-Prompt Injection V2</h1>
+            <p>Diagrama de Arquitetura Interativo</p>
+        </div>
+
+        <div class="diagram-container">
+            <div class="architecture-diagram" id="diagram">
+                <!-- Usuários -->
+                <div class="layer user-layer" data-tooltip="Interface web para demonstração do sistema">
+                    👤<br>Usuário<br>Web
+                </div>
+                <div class="layer user-layer user-api" data-tooltip="Clientes que consomem a API REST">
+                    🔌<br>Cliente<br>API
+                </div>
+
+                <!-- Load Balancer -->
+                <div class="layer load-balancer" data-tooltip="Distribui requisições entre instâncias da aplicação">
+                    ⚖️<br>Load<br>Balancer
+                </div>
+
+                <!-- FastAPI Cluster -->
+                <div class="layer fastapi-cluster" data-tooltip="Cluster da aplicação FastAPI com múltiplas instâncias">
+                    🚀 Aplicação FastAPI
+                    <div class="fastapi-instance instance1" data-tooltip="Instância 1 da API (Port 8080)">
+                        API 1<br>:8080
+                    </div>
+                    <div class="fastapi-instance instance2" data-tooltip="Instância 2 da API (Port 8081)">
+                        API 2<br>:8081
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 10px; font-size: 10px;">
+                        /health | /api/v1/check-prompt | /
+                    </div>
+                </div>
+
+                <!-- Core Components -->
+                <div class="layer core-cluster" data-tooltip="Componentes principais do sistema de detecção">
+                    🔧 Componentes Core
+                    <div class="core-component detector" data-tooltip="Motor de detecção que analisa os prompts">
+                        🔍<br>Detector<br>Engine
+                    </div>
+                    <div class="core-component keywords" data-tooltip="Lista das 10 palavras-chave monitoradas">
+                        📝<br>Keywords<br>List
+                    </div>
+                    <div class="core-component validator" data-tooltip="Validador de entrada usando Pydantic">
+                        ✅<br>Input<br>Validator
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 10px; font-size: 10px;">
+                        Algoritmo O(n*m) | Tempo < 10ms
+                    </div>
+                </div>
+
+                <!-- Observabilidade -->
+                <div class="layer observability-cluster" data-tooltip="Sistema de monitoramento e observabilidade">
+                    📊 Observabilidade
+                    <div class="obs-component logs" data-tooltip="Logs estruturados em formato JSON">
+                        📄<br>Logs
+                    </div>
+                    <div class="obs-component metrics" data-tooltip="Métricas de performance e uso">
+                        📈<br>Métricas
+                    </div>
+                </div>
+
+                <!-- Conexões -->
+                <div class="connection conn1"></div>
+                <div class="connection conn2"></div>
+                <div class="connection conn3"></div>
+                <div class="connection conn4"></div>
+                <div class="connection conn5"></div>
+
+                <!-- Labels -->
+                <div class="label" style="top: 75px; left: 180px;">HTTP</div>
+                <div class="label" style="top: 175px; left: 180px;">API</div>
+                <div class="label" style="top: 125px; left: 420px;">Balance</div>
+                <div class="label" style="top: 250px; left: 550px;">Process</div>
+                <div class="label" style="top: 145px; left: 770px;">Monitor</div>
+            </div>
+
+            <div class="info-panel">
+                <div class="info-card">
+                    <h3>🎯 Palavras-chave Monitoradas</h3>
+                    <div class="keywords-list">
+                        ignore • forget • system • admin • override<br>
+                        bypass • jailbreak • prompt • instruction • command
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>⚡ Performance</h3>
+                    <ul>
+                        <li>Latência < 10ms</li>
+                        <li>Throughput > 1000 req/s</li>
+                        <li>Memory usage < 100MB</li>
+                        <li>Cobertura de testes: 92%</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>🛠️ Stack Tecnológico</h3>
+                    <ul>
+                        <li>Python 3.9+ / FastAPI</li>
+                        <li>Pydantic (validação)</li>
+                        <li>Pytest (testes)</li>
+                        <li>Docker (container)</li>
+                        <li>Uvicorn (servidor)</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔍 Algoritmo de Detecção</h3>
+                    <ul>
+                        <li>Normalização lowercase</li>
+                        <li>Busca sequencial O(n*m)</li>
+                        <li>Primeira palavra encontrada</li>
+                        <li>Comparação case-insensitive</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        const layers = document.querySelectorAll('[data-tooltip]');
+
+        layers.forEach(layer => {
+            layer.addEventListener('mouseenter', (e) => {
+                const tooltipText = e.target.getAttribute('data-tooltip');
+                tooltip.textContent = tooltipText;
+                tooltip.style.display = 'block';
+                
+                // Add pulse animation
+                e.target.classList.add('pulse');
+            });
+
+            layer.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 10 + 'px';
+            });
+
+            layer.addEventListener('mouseleave', (e) => {
+                tooltip.style.display = 'none';
+                e.target.classList.remove('pulse');
+            });
+        });
+
+        // Click functionality for components
+        layers.forEach(layer => {
+            layer.addEventListener('click', (e) => {
+                const component = e.target.textContent.trim();
+                
+                // Simple alert with component info
+                let info = '';
+                if (component.includes('Usuário')) {
+                    info = 'Interface web de demonstração do sistema. Permite testar prompts em tempo real.';
+                } else if (component.includes('Cliente')) {
+                    info = 'Clientes externos que consomem a API REST via POST /api/v1/check-prompt';
+                } else if (component.includes('Load')) {
+                    info = 'Distribui requisições entre múltiplas instâncias da aplicação FastAPI.';
+                } else if (component.includes('FastAPI')) {
+                    info = 'Aplicação principal com endpoints: /health, /api/v1/check-prompt, / (demo)';
+                } else if (component.includes('Detector')) {
+                    info = 'Motor principal que executa a detecção de prompt injection (detector.py)';
+                } else if (component.includes('Keywords')) {
+                    info = 'Lista das 10 palavras-chave: ignore, forget, system, admin, override, bypass, jailbreak, prompt, instruction, command';
+                } else if (component.includes('Validator')) {
+                    info = 'Validador de entrada usando Pydantic. Verifica tamanho, formato e campos obrigatórios.';
+                } else if (component.includes('Observabilidade')) {
+                    info = 'Sistema de monitoramento com logs estruturados e métricas de performance.';
+                }
+                
+                if (info) {
+                    alert(component + ':\n\n' + info);
+                }
+            });
+        });
+
+        // Add some dynamic effects
+        setInterval(() => {
+            const connections = document.querySelectorAll('.connection');
+            connections.forEach(conn => {
+                conn.style.opacity = '0.3';
+                setTimeout(() => {
+                    conn.style.opacity = '1';
+                }, 500);
+            });
+        }, 3000);
+
+        // Add loading animation
+        window.addEventListener('load', () => {
+            const layers = document.querySelectorAll('.layer');
+            layers.forEach((layer, index) => {
+                layer.style.opacity = '0';
+                layer.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    layer.style.transition = 'all 0.5s ease';
+                    layer.style.opacity = '1';
+                    layer.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

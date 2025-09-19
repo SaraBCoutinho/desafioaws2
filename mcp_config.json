@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "anti-prompt-injection": {
+      "command": "/home/participant/prj-sara-v2/venv/bin/python",
+      "args": [
+        "/home/participant/prj-sara-v2/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/home/participant/prj-sara-v2"
+      }
+    }
+  }
+}
